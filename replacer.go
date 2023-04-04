@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"regexp"
 	"strings"
 
@@ -17,6 +18,7 @@ type Driver interface {
 
 var isDistributed = regexp.MustCompile(`(?is)engine = distributed\(.+?,.+?,(.+?),.+?\)\s*;`)
 var tableOrder = regexp.MustCompile(`(?is)create table (?:if not exists |)(.+?)\(.+?order by\s*\(([^\)]+?)\)`)
+var commentWithDelimiter = regexp.MustCompile(`--.*;.*`)
 
 func init() {
 	database.Register("clickhouse2", &MigrationDriver{&clickhouse.ClickHouse{}})
@@ -51,6 +53,11 @@ func (d *MigrationDriver) Run(r io.Reader) error {
 		"defaultdb.", "",
 	).Replace(str)
 
+	badComments := commentWithDelimiter.FindAllString(str, -1)
+	for _, comment := range badComments {
+		log.Printf("maybe multi statement delimiter (;) in comment near '%s'", prepareBadCommentMessage(comment))
+	}
+
 	if distMatch := isDistributed.FindAllStringSubmatch(str, -1); len(distMatch) > 0 {
 		ordersMatch := tableOrder.FindAllStringSubmatch(str, -1)
 
@@ -73,4 +80,14 @@ func (d *MigrationDriver) Run(r io.Reader) error {
 	}
 
 	return d.Driver.Run(strings.NewReader(str))
+}
+
+func prepareBadCommentMessage(comment string) string {
+	comment = strings.TrimSpace(comment)
+
+	if len(comment) > 100 {
+		comment = comment[0:45] + " ... " + comment[len(comment)-45:]
+	}
+
+	return comment
 }
