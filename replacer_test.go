@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"ch-migrator/mocks"
+	"clickhouse-migrator/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

@@ -1,4 +1,4 @@
-module ch-migrator
+module clickhouse-migrator
 
 go 1.18
 
