@@ -47,16 +47,16 @@ func (d *MigrationDriver) Run(r io.Reader) error {
 
 	str := string(content)
 
+	badComments := commentWithDelimiter.FindAllString(str, -1)
+	for _, comment := range badComments {
+		log.Printf("maybe multi statement delimiter (;) in comment near '%s'", prepareBadCommentMessage(comment))
+	}
+
 	str = strings.NewReplacer(
 		"ON CLUSTER '{cluster}'", "",
 		"on cluster '{cluster}'", "",
 		"defaultdb.", "",
 	).Replace(str)
-
-	badComments := commentWithDelimiter.FindAllString(str, -1)
-	for _, comment := range badComments {
-		log.Printf("maybe multi statement delimiter (;) in comment near '%s'", prepareBadCommentMessage(comment))
-	}
 
 	if distMatch := isDistributed.FindAllStringSubmatch(str, -1); len(distMatch) > 0 {
 		ordersMatch := tableOrder.FindAllStringSubmatch(str, -1)
