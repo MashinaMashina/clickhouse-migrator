@@ -2,9 +2,15 @@ create table defaultdb.category_products on cluster '{cluster}' (
     wb_category_id UInt64,
     created_at_month TIMESTAMP,
     wb_product_id UInt64,
-    days_of_month_mask UInt32
+    days_of_month_mask UInt32,
+    txt TEXT
 ) engine = ReplacingMergeTree PARTITION BY created_at_month
 ORDER BY (wb_category_id, created_at_month, wb_product_id) SETTINGS index_granularity = 1024;
+--
+-- insert into defaultdb.category_products (wb_category_id) values(1); - commented
+-- any query with semi-colon;
+--
+insert into defaultdb.category_products (txt) values("-- value;");
 --
 create table if not exists defaultdb.category_products_current on cluster '{cluster}' (
     wb_category_id UInt64,

@@ -2,9 +2,15 @@ create table category_products  (
     wb_category_id UInt64,
     created_at_month TIMESTAMP,
     wb_product_id UInt64,
-    days_of_month_mask UInt32
+    days_of_month_mask UInt32,
+    txt TEXT
 ) engine = ReplacingMergeTree PARTITION BY created_at_month
 ORDER BY (wb_category_id, created_at_month, wb_product_id) SETTINGS index_granularity = 1024;
+--
+
+--
+insert into category_products (txt) values("
+
 --
 create table if not exists category_products_current  (
     wb_category_id UInt64,

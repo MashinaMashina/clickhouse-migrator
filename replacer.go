@@ -17,6 +17,7 @@ type Driver interface {
 
 var isDistributed = regexp.MustCompile(`(?is)engine = distributed\(.+?,.+?,(.+?),.+?\)\s*;`)
 var tableOrder = regexp.MustCompile(`(?is)create table (?:if not exists |)(.+?)\(.+?order by\s*\(([^\)]+?)\)`)
+var commentWithDelimiter = regexp.MustCompile(`--.*;.*`)
 
 func init() {
 	database.Register("clickhouse2", &MigrationDriver{&clickhouse.ClickHouse{}})
@@ -50,6 +51,8 @@ func (d *MigrationDriver) Run(r io.Reader) error {
 		"on cluster '{cluster}'", "",
 		"defaultdb.", "",
 	).Replace(str)
+
+	str = commentWithDelimiter.ReplaceAllString(str, "")
 
 	if distMatch := isDistributed.FindAllStringSubmatch(str, -1); len(distMatch) > 0 {
 		ordersMatch := tableOrder.FindAllStringSubmatch(str, -1)
