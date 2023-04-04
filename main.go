@@ -22,7 +22,7 @@ func main() {
 				Usage: "host:port?username=user&password=password&database=clicks&x-multi-statement=true",
 			},
 		},
-		Action: Migrate,
+		Action: Copy,
 	}
 
 	if err := app.Run(os.Args); err != nil {
